@@ -46,7 +46,7 @@ function groupNeighborsByTempo(intervalCounts) {
 
 	var foundTempo = tempoCounts.some(function(tempoCount) {
 	    if (tempoCount.tempo === theoreticalTempo)
-	    return tempoCount.count += intervalCount.count;
+                return tempoCount.count += intervalCount.count;
 	});
 	if (!foundTempo) {
 	    tempoCounts.push({
