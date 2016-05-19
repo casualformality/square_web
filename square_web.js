@@ -1,79 +1,160 @@
+var musicPlayer;
+var collectionList = [];
 
-function filterData(buffer) {
-    var offlineContext = new OfflineAudioContext(1, buffer.length, buffer.sampleRate);
-    
-    var source = offlineContext.createBufferSource();
-    source.buffer = buffer;
+var selectedCollection;
+var allSongsCollection;
+var selectedFolder;
 
-    var filter = offlineContext.createBiquadFilter();
-    filter.type = "lowpass";
+/******************************/
+/****** Class Definitions *****/
+/******************************/
 
-    source.connect(filter);
-    filter.connect(offlineContext.destination);
-
-    source.start(0);
-    
-    offlineContext.startRendering();
-    offlineContext.oncomplete = function(e) {
-        var filteredBuffer = e.renderedBuffer;
-    };
+function Collection(collectionName) {
+	this.name = collectionName;
+	this.songs = [];
 }
 
-function getPeaksAtThreshold(data, threshold) {
-    var peaksArray = [];
-    var length = data.length;
-    for(var i = 0; i < length;) {
-	if (data[i] > threshold) {
-	    peaksArray.push(i);
-	    // Skip forward ~ 1/4s to get past this peak.
-	    i += 10000;
+function Song(filename) {
+	this.file = filename;
+	this.title = filename.replace(/\.mp3|.*\//gi, "");
+}
+
+/******************************/
+/******* Model Functions ******/
+/******************************/
+function addFileToCollection(filename, collection) {
+	if(!filename || !collection) {
+		alert("Invalid selection");
+		return;
 	}
-	i++;
-    }
-    return peaksArray;
+
+	var newFile = new Song(filename);
+	collection.songs.push(newFile);
+	updateSongList();
 }
 
-// Function used to return a histogram of tempo candidates.
-function groupNeighborsByTempo(intervalCounts) {
-    var tempoCounts = []
-    intervalCounts.forEach(function(intervalCount, i) {
-	// Convert an interval to tempo
-	var theoreticalTempo = 60 / (intervalCount.interval / 44100 );
-
-	// Adjust the tempo to fit within the 90-180 BPM range
-	while (theoreticalTempo < 90) theoreticalTempo *= 2;
-	while (theoreticalTempo > 180) theoreticalTempo /= 2;
-
-	var foundTempo = tempoCounts.some(function(tempoCount) {
-	    if (tempoCount.tempo === theoreticalTempo)
-                return tempoCount.count += intervalCount.count;
-	});
-	if (!foundTempo) {
-	    tempoCounts.push({
-		tempo: theoreticalTempo,
-		count: intervalCount.count
-	    });
+function removeFileFromCollection(file, collection) {
+	var index = jQuery.inArray(file, collection);
+	if(index < 0) {
+		alert("Invalid file");
+		return;
 	}
-    });
+
+	collection.splice(index, 1);
+	updateSongList();
 }
 
-// Function used to return a histogram of peak intervals
-function countIntervalsBetweenNearbyPeaks(peaks) {
-    var intervalCounts = [];
-    peaks.forEach(function(peak, index) {
-	for(var i = 0; i < 10; i++) {
-	    var interval = peaks[index + i] - peak;
-	    var foundInterval = intervalCounts.some(function(intervalCount) {
-	    if (intervalCount.interval === interval)
-		return intervalCount.count++;
-	    });
-	    if (!foundInterval) {
-		intervalCounts.push({
-		    interval: interval,
-		    count: 1
-		});
-	    }
-	}
-    });
-    return intervalCounts;
+function addCollection(collectionName) {
+ 	if(!collectionName || collectionName == "") {
+ 		alert("Invalid collection name");
+ 		return null;
+ 	}
+
+ 	var newCollection = new Collection(collectionName);
+ 	
+ 	collectionList.push(newCollection);
+ 	selectedCollection = newCollection;
+
+ 	updateCollectionList();
+ 	updateSongList();
+
+ 	return newCollection;
 }
+
+function removeCollection(collection) {
+	var index = jQuery.inArray(collection, collectionList);
+	if(index < 0 || collection == allSongsCollection) {
+		alert("Invalid collection");
+		return;
+	}
+
+	collectionList.splice(index, 1);
+
+	updateCollectionList();
+	if(collection == selectedCollection) {
+		selectedCollection = null;
+		updateSongList();
+	}
+}
+
+function selectCollection(collection) {
+	updateSongList();
+}
+
+function selectSong(song) {
+	//musicPlayer.select(file);
+}
+
+function devInit() {
+	allSongsCollection = addCollection("All Music");
+	addFileToCollection("foo/tmpfile1.mp3", allSongsCollection);
+	addFileToCollection("foo/tmpfile2.mp3", allSongsCollection);
+	addFileToCollection("foo/tmpfile3.mp3", allSongsCollection);
+}
+
+/******************************/
+/******* View Functions *******/
+/******************************/
+
+function updateCollectionList() {
+	var collectionListElement = document.getElementById("collection-list");
+	for (a in collectionListElement.options) {
+		collectionListElement.options.remove(0);
+	}
+
+	for (c in collectionList) {
+		var opt = document.createElement('option');
+		opt.appendChild( document.createTextNode(collectionList[c].name) );
+		collectionListElement.appendChild(opt);
+	}
+}
+
+function updateFolderList() {
+
+}
+
+function updateSongList() {
+	// Clear current song list
+	var songListElement = document.getElementById("song-list");
+	for (a in songListElement.options) { 
+		songListElement.options.remove(0);
+	}
+
+	// Populate song list from collection
+	var collectionListElement = document.getElementById("collection-list");
+	var selectedCollectionIdx = collectionListElement.selectedIndex;
+	if(selectedCollectionIdx >= 0) {
+		selectedCollection = collectionList[selectedCollectionIdx];
+		for (s in selectedCollection.songs) {
+			var opt = document.createElement('option');
+			opt.appendChild( document.createTextNode(
+					selectedCollection.songs[s].title) );
+			songListElement.appendChild(opt);
+		}
+	} else {
+		selectedCollection = null;
+	}
+}
+
+function selectedSongChanged(songListElement) {
+	var element = document.getElementById("mp-title");
+	var index = songListElement.selectedIndex;
+	var selectedSong;
+
+	if(index >= 0) {
+		element.innerHTML = songListElement.options[index].text;
+		selectedSong = selectedCollection.songs[index];
+	} else {
+		element.innerHTML = "No song selected.";
+		selectedSong = null;
+	}
+	selectSong(selectedSong);
+}
+
+/******************************/
+/**** Controller Functions ****/
+/******************************
+musicPlayer.select = function(file) {
+	document.getElementById("mp-title").innerHtml = file.title;
+}
+*/
