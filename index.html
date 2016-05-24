@@ -13,12 +13,13 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 
     <script src="square_web.js"></script>
-    <link rel="stylesheet" href="square_web.css">
+    <script src="player.js"></script>
+    <link rel="stylesheet" href="style.css">
   </head>
   <body onload="devInit();">
     <div class="container">
       <div class="row">
-        <div class="col-md-4 col-xs-6 sw-mainview">
+        <div class="col-md-6 col-xs-6 sw-mainview">
           <h4>This is the song view</h4>
           <div class="form">
             <select class="form-control" id="song-list" size="6" ondblclick ="selectedSongChanged(this);">
@@ -27,9 +28,49 @@
             </select>
           </div>
         </div>
-        <div class="col-md-8 col-xs-6 sw-mainview">
+        <div class="col-md-6 col-xs-6 sw-mainview">
           <h4>This is the music player</h4>
           <p id="mp-title">No File Selected</p>
+          <div class="row top-buffer">
+            <div class="col-md-2 col-xs-2">
+              Speed:
+            </div>
+            <div class="col-md-8 col-xs-8">
+              <input type="range" id="speedRange" max="400" min="50" value="100"
+                  oninput="Player.changeSpeed(this)" />
+            </div>
+            <div class="col-md-2 col-xs-2">
+              <input type="number" step="0.01" min="0.5" max="4.00" value="1.00" id="speedField"
+                  oninput="Player.changeSpeed(this)" />
+            </div>
+          </div>
+          <div class="row top-buffer">
+            <div class="col-md-2 col-xs-2">
+              Volume:
+            </div>
+            <div class="col-md-8 col-xs-8">
+              <input type="range" id="volumeRange" max="100" min="0" value="100"
+                  oninput="Player.changeVolume(this)" />
+            </div>
+            <div class="col-md-2 col-xs-2">
+              <input type="number" step="0.01" min="0.0" max="1.00" value="1.00" id="volumeField"
+                  oninput="Player.changeVolume(this)" />
+            </div>
+          </div>
+          <div class="row top-buffer">
+            <div class="col-md-3 col-xs-3">
+              <button type="button" onclick="Player.load('test.mp3')">Load</button>
+            </div>
+            <div class="col-md-3 col-xs-3">
+              <button type="button" onclick="Player.play()">Play</button>
+            </div>
+            <div class="col-md-3 col-xs-3">
+              <button type="button" onclick="Player.stop()">Stop</button>
+            </div>
+            <div class="col-md-3 col-xs-3">
+              <button type="button" onclick="Player.pause()">Pause</button>
+            </div>
+          </div>
         </div>
       </div>
       <div class="row">

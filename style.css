@@ -6,3 +6,11 @@
   border: 1px solid #ddd;
   border: 1px solid rgba(86,61,124,.2);
 }
+
+.top-buffer {
+    margin-top: 10px;
+}
+
+.scrollable {
+    overflow-x: scroll;
+}
