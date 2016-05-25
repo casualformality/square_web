@@ -90,6 +90,8 @@ function devInit() {
 	addFileToCollection("foo/tmpfile1.mp3", allSongsCollection);
 	addFileToCollection("foo/tmpfile2.mp3", allSongsCollection);
 	addFileToCollection("foo/tmpfile3.mp3", allSongsCollection);
+
+  updateFolderList();
 }
 
 /******************************/
@@ -97,20 +99,74 @@ function devInit() {
 /******************************/
 
 function updateCollectionList() {
-	var collectionListElement = document.getElementById("collection-list");
-	for (a in collectionListElement.options) {
-		collectionListElement.options.remove(0);
-	}
+  $('#collection-list')
+    .find('option')
+    .remove()
+    .end()
+  ;
 
-	for (c in collectionList) {
-		var opt = document.createElement('option');
-		opt.appendChild( document.createTextNode(collectionList[c].name) );
-		collectionListElement.appendChild(opt);
-	}
+  $.each(collectionList, function(key,val) {
+      $('#collection-list')
+        .append($("<option></option>")
+          .attr("value",val.name)
+          .text(val.name));
+  });
 }
 
 function updateFolderList() {
+  var folderListElement = document.getElementById("folder-list");
 
+  // Ugly code to parse paths correctly
+  if(selectedFolder) {
+    var selectedFile = folderListElement.value;
+    if(selectedFile == "..") {
+      var path = selectedFolder.split("/");
+      path.pop();
+      selectedFolder = path.join("/");
+
+      if(selectedFolder == "") {
+        selectedFolder = "/";
+        return;
+      }
+    } else if(selectedFile == ".") {
+      return;
+    } else {
+      selectedFolder += "/" + folderListElement.value;
+    }
+  } else {
+    selectedFolder = "/";
+  }
+  console.log(selectedFolder);
+
+  /** Begin POST **/
+  $.post(
+    "php/dirlist.php", 
+    {path: selectedFolder}
+  )
+
+  // Show new listing on success
+  .done(function(data) {
+    var dirlist = JSON.parse(data);
+
+    $('#folder-list')
+      .find('option')
+      .remove()
+      .end()
+    ;
+
+    $.each(dirlist, function(key,val) {
+        $('#folder-list')
+          .append($("<option></option>")
+            .attr("value",val)
+            .text(val));
+    });
+  })
+
+  // Alert on failure
+  .fail(function() {
+    window.alert("Request failed");
+  });
+  /** End POST **/
 }
 
 function updateSongList() {
@@ -158,3 +214,4 @@ musicPlayer.select = function(file) {
 	document.getElementById("mp-title").innerHtml = file.title;
 }
 */
+
