@@ -1,0 +1,94 @@
+Raspberry Pi 3 project specifications
+
+Summary-  Create or assemble existing programs to run on Raspberry Pi to produce music to input into external amp.  Must be able to play mp3 and allow independent pitch and speed variation.  Must allow the user to input start and end loop points so songs can be looped.
+
+Requirements-
+A program that will allow the user to store mp3 tracks and to access the tracks from either a master list or playlists.  e.g. say 100 songs are saved and the user wants to group them by themes.  So he creates a playlist of "fast songs" and a playlist of "Irish songs".  There may be overlap, i.e., some fast songs can also be Irish songs.
+
+User will specify the start and stopping loop points based on the time lapsed from start of play in seconds to three decomal places as the mp3 was recorded.  Program wll play the song starting at the beginning, pass the start loop point and then loop between loop points.  
+
+User will be able to change the speed of the song without changing the pitch and vice versa.  If possible the program will be able to scan the song and determine the beats per minute so the user can determine how the speed should be changed.  If this is not possible, the user will input the speed (beats per minute), the program will display it so the user can determine the percent change  required to get the desired speed
+
+Program will display lists of songs so user can choose songs to play.
+
+Program will be able to record music in mp3 format.  The source of the music will be the amplifier used to amplify the Raspberry 3 output.   This may require minor hardware work since the pi has no microphone input, but it does have USB ports.
+
+
+Other desirable features
+
+Pi should be able to run Java program to be supplied
+Pi should be able to run simple word processor
+
+
+This is intended to replace the square dance calling program SQVIEW.  SQVIEW has a ton more features which I do not need, it also only runs on windows.  I don't know if it can be made to run using Windows 10 IOT.  If it can run on Window 10 IOT then the job is done.  You can find it at http://www.sqview.se/.  It was written by Thomas Bernhed who lives in  Floda, Sweden
+
+=====
+
+Should this be able to play multiple songs simultaneously?
+No
+
+Should pitch and speed adjustments be persistent?
+No
+
+Do you want to save modified songs to mp3?
+No.  The idea is not to modify songs permanently.  Just apply parameters during playback. 
+
+Should music recording be through the microphone?
+Recording will be from the amp signal.
+
+Do you want to be able to modify multiple songs simultaneously?
+No.
+
+
+Here's how the whole process works
+
+I find a song I want to use.  It may be any format e.g., MIDI, mp3, .wav
+
+I convert it to a .wav file using band in a box and roland something or other.  At this time I set the speed to 125 beats per minute (BPM)
+
+I use cooledit 2000 (basically the same as audacity) to normalize the volume, edit as necessary and determine the loop start and stop
+
+I save the file as an mp3 and note the loop start and stop points
+
+When I call  a square dance I play the song adjusting the speed as necessary , usually speeding up a bit if the dancers are energetic, slowing down if they are old farts.  Should be able to adjust the speed as the song is playing.  The song should start at the beginning then loop between the loop points.
+
+As the music plays, I call the dance using a microphone which feeds into an amplifier along with the music.  The amp has an output to the speakers and also an audio out.  The audio out is fed into the computer mic input and is recorded.  Pi has no mic input, so I would need a work around on this.
+
+There are a bunch of music players that have most of this, but I can't find one with the loop function.  Most programs with a loop function only play what is within the loop.  I need the intro to play before the loop . 
+
+ Loop is critical.  Speed control very desirable.  Pitch control optional.  Volume control critical.
+
+ Here is an entry from the sqview data file
+
+ [C:\SqView\MP3\on the road again 13.115-301.mp3]
+ LoopSet=13.12
+ LoopStop=181.00
+ Tempo=0
+ Pitch=0
+ Speed=44100
+ Volume=60
+ Keychange=0.00
+ Keychange_value=0
+ Rate=
+ Col1=
+ Col2=
+ Eq1=15
+ Eq2=15
+ Eq3=15
+ Eq4=15
+ Eq5=15
+ Eq6=15
+ Eq7=15
+ Eq8=15
+ Eq9=15
+ Eq10=15
+
+ Line 1 is the song - when I titled it I threw in the loop start and stop in seconds as part of the name.
+ Line 2 is loop start
+ Line 3 is loop end
+ Line 4 is tempo adjustment
+ Line 5 is pitch adjustment
+ Line 6 is recorded speed ???  This is set in Cooledit and never varies
+ Line 7 is volume.  I almost always set this at 60%.  If it is higher it usually over feeds the amp.
+
+ None of the others are used by me.
