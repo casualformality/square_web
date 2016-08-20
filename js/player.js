@@ -11,24 +11,51 @@ function init() {
     }
 }
 
+function loopAudio(sound, loopStart, loopEnd) {
+  // Only do this if our context matches the current song
+  if((sound.src != Player.sound.src) ||
+        (loopStart >= loopEnd) ||
+        (!sound.duration) ||
+        (!sound.paused)) {
+    return;
+  }
+  
 
-Player.load = function(filename) {
+  window.setTimeout(loopAudio,
+      (loopEnd - loopStart),
+      soundSrc, 
+      loopStart, 
+      loopEnd);
+}
+
+Player.load = function(file, autoplay) {
     if(this.sound) {
         this.sound.pause();
-        this.src.src = filename;
     } else {
         this.sound = document.createElement("audio");
         this.sound.preload = "auto";
 
         var src = document.createElement("source");
-        src.src = filename;
         this.src = src;
         this.sound.appendChild(src);
     }
 
-    this.sound.load();
+    this.sound.autoplay = autoplay;
+  
+    var reader = new FileReader();
+    reader.onload = (
+        function(audio) {
+          return function(e) {
+            audio.src = e.target.result;
+          };
+        }
+      )(this.sound);
+    reader.readAsDataURL(file);
+  
     this.speed  = 1.00;
     this.volume = 1.00;
+    this.start  = 0.00;
+    this.end    = 0.00;
 
     document.getElementById('speedRange').value = this.speed * 100;
     document.getElementById('speedField').value = this.speed.toFixed(2);
@@ -58,6 +85,14 @@ Player.stop = function() {
     this.sound.load();
     this.sound.volume = this.volume;
     this.sound.playbackRate = this.speed;
+}
+
+Player.skip = function() {
+  // TODO
+}
+
+Player.previous = function() {
+  // TODO
 }
 
 Player.changeVolume = function(element) {
